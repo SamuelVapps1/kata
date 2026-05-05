@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 import ReactMarkdown from 'react-markdown';
 import { EvaluationResult } from '@/lib/types';
 import { createMockEvaluation } from '@/lib/mock-data';
@@ -128,19 +127,6 @@ export default function ReportPage() {
   }
 
   const recommendation = getRecommendation(evaluation.overallScore);
-  const radarData = [
-    { dimension: 'Problem Definition', score: evaluation.dimensionScores.problemDefinition },
-    { dimension: 'Stakeholder Mgmt', score: evaluation.dimensionScores.stakeholderManagement },
-    { dimension: 'Analytical', score: evaluation.dimensionScores.analyticalThinking },
-    { dimension: 'Communication', score: evaluation.dimensionScores.communication },
-    { dimension: 'Prioritization', score: evaluation.dimensionScores.prioritization },
-    { dimension: 'Technical', score: evaluation.dimensionScores.technicalUnderstanding },
-    { dimension: 'Design', score: evaluation.dimensionScores.designSensitivity },
-    { dimension: 'Data Driven', score: evaluation.dimensionScores.dataDriven },
-    { dimension: 'Execution', score: evaluation.dimensionScores.executionFocus },
-    { dimension: 'Leadership', score: evaluation.dimensionScores.leadership },
-  ];
-
   const dimensions = Object.entries(evaluation.dimensionScores) as [keyof EvaluationResult['dimensionScores'], number][];
 
   return (
@@ -189,26 +175,7 @@ export default function ReportPage() {
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Dimension Scores</h2>
           </div>
           <div className="p-6">
-            <div className="hidden lg:block h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="#e2e8f0" />
-                  <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                  <Radar
-                    name="Score"
-                    dataKey="score"
-                    stroke="#1e40af"
-                    fill="#1e40af"
-                    fillOpacity={0.2}
-                    strokeWidth={2}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="lg:hidden">
-              <ScoreTable evaluation={evaluation} />
-            </div>
+            <ScoreTable evaluation={evaluation} />
           </div>
         </div>
 
