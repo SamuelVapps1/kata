@@ -4,10 +4,20 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { mockBrief, mockDiscoveryTranscript, mockInternalEmail } from '@/lib/mock-data';
-import { AgentPersona, Message } from '@/lib/types';
+import { Message as ApiMessage, Session } from '@/lib/schema';
 
 type LeftTab = 'brief' | 'discovery' | 'email';
+type AgentPersona = 'sarah' | 'marcus' | 'priya';
 type RightTab = AgentPersona;
+type UIMessage = ApiMessage & { id: string; timestamp: number };
+
+function toUIMessage(message: ApiMessage, index: number): UIMessage {
+  return {
+    ...message,
+    id: `${message.role}-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: Date.now(),
+  };
+}
 
 export default function SessionPage() {
   const params = useParams();
@@ -22,7 +32,7 @@ export default function SessionPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes
-  const [messages, setMessages] = useState<Record<AgentPersona, Message[]>>({
+  const [messages, setMessages] = useState<Record<AgentPersona, UIMessage[]>>({
     sarah: [], marcus: [], priya: []
   });
   const [chatInput, setChatInput] = useState('');
@@ -70,9 +80,14 @@ export default function SessionPage() {
       const response = await fetch(`/api/session?id=${sessionId}`);
       if (response.ok) {
         const session = await response.json();
-        setTitle(session.title || '');
-        setMarkdown(session.markdown || '');
-        setMessages(session.agentChats || { sarah: [], marcus: [], priya: [] });
+        const typedSession = session as Session;
+        setTitle(typedSession.deliverableTitle || '');
+        setMarkdown(typedSession.deliverableMarkdown || '');
+        setMessages({
+          sarah: typedSession.conversations.sarah.messages.map(toUIMessage),
+          marcus: typedSession.conversations.marcus.messages.map(toUIMessage),
+          priya: typedSession.conversations.priya.messages.map(toUIMessage),
+        });
       } else {
         // Create new session if not found
         const createResponse = await fetch('/api/session', {
@@ -82,9 +97,7 @@ export default function SessionPage() {
         });
         if (createResponse.ok) {
           const newSession = await createResponse.json();
-          setTitle(newSession.title || '');
-          setMarkdown(newSession.markdown || '');
-          setMessages(newSession.agentChats || { sarah: [], marcus: [], priya: [] });
+          router.replace(`/session/${newSession.id}`);
         }
       }
     } catch (error) {
@@ -96,18 +109,12 @@ export default function SessionPage() {
     setSaving(true);
     try {
       await fetch('/api/session', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'save',
-          session: {
-            id: sessionId,
-            title,
-            markdown,
-            agentChats: messages,
-            status: 'in_progress',
-            createdAt: Date.now()
-          }
+          id: sessionId,
+          deliverableTitle: title,
+          deliverableMarkdown: markdown,
         })
       });
       setSaved(true);
@@ -123,7 +130,7 @@ export default function SessionPage() {
     if (!chatInput.trim() || sending) return;
     
     setSending(true);
-    const userMessage: Message = {
+    const userMessage: UIMessage = {
       id: Math.random().toString(36).substring(2, 9),
       role: 'user',
       content: chatInput,
@@ -140,17 +147,18 @@ export default function SessionPage() {
       const response = await fetch('/api/agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, persona: rightTab, message: chatInput })
+        body: JSON.stringify({ sessionId, agent: rightTab, message: chatInput })
       });
       const data = await response.json();
+      const assistantMessage = toUIMessage(data.message as ApiMessage, messages[rightTab].length);
       setMessages(prev => ({
         ...prev,
-        [rightTab]: [...prev[rightTab], data.message]
+        [rightTab]: [...prev[rightTab], assistantMessage]
       }));
     } catch (error) {
       console.error('Failed to send message:', error);
       // Fallback response
-      const fallback: Message = {
+      const fallback: UIMessage = {
         id: 'fallback',
         role: 'assistant',
         content: 'I understand your point. Could you elaborate on how this approach addresses the constraints we discussed?',
@@ -192,19 +200,13 @@ export default function SessionPage() {
   const submitFinal = async () => {
     try {
       await fetch('/api/session', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'save',
-          session: {
-            id: sessionId,
-            title,
-            markdown,
-            agentChats: messages,
-            status: 'submitted',
-            createdAt: Date.now(),
-            pyramidSummary: pyramidData
-          }
+          id: sessionId,
+          deliverableTitle: title,
+          deliverableMarkdown: markdown,
+          pyramidSummary: pyramidData,
         })
       });
       router.push(`/report/${sessionId}`);

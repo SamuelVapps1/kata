@@ -79,7 +79,6 @@ export default function ReportPage() {
   const sessionId = params.id as string;
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [chartError, setChartError] = useState(false);
 
   useEffect(() => {
     loadEvaluation();
@@ -190,27 +189,23 @@ export default function ReportPage() {
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Dimension Scores</h2>
           </div>
           <div className="p-6">
-            {!chartError ? (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData} onError={() => setChartError(true)}>
-                    <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 11, fill: '#64748b' }} />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <Radar
-                      name="Score"
-                      dataKey="score"
-                      stroke="#1e40af"
-                      fill="#1e40af"
-                      fillOpacity={0.2}
-                      strokeWidth={2}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <ScoreTable evaluation={evaluation} />
-            )}
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                  <Radar
+                    name="Score"
+                    dataKey="score"
+                    stroke="#1e40af"
+                    fill="#1e40af"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 

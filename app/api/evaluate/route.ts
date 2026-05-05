@@ -41,6 +41,14 @@ const FALLBACK_REPORT: EvaluationReport = {
   },
 };
 
+function buildFallbackReport(session: ReturnType<typeof getSession>): EvaluationReport {
+  return {
+    ...FALLBACK_REPORT,
+    finalDeliverable: session?.deliverableMarkdown?.trim() || FALLBACK_REPORT.finalDeliverable,
+    pyramidSummary: session?.pyramidSummary || FALLBACK_REPORT.pyramidSummary,
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -85,6 +93,7 @@ Key Arguments: ${session.pyramidSummary.keyArguments}
 Ask: ${session.pyramidSummary.ask}` : 'No pyramid summary provided'}`;
 
     let report: EvaluationReport;
+    const fallbackReport = buildFallbackReport(session);
 
     if (process.env.ANTHROPIC_API_KEY) {
       try {
@@ -106,14 +115,14 @@ Ask: ${session.pyramidSummary.ask}` : 'No pyramid summary provided'}`;
           }
         } catch (parseError) {
           console.error('Failed to parse AI evaluation response:', parseError);
-          report = FALLBACK_REPORT;
+          report = fallbackReport;
         }
       } catch (aiError) {
         console.error('Anthropic evaluation error, using fallback:', aiError);
-        report = FALLBACK_REPORT;
+        report = fallbackReport;
       }
     } else {
-      report = FALLBACK_REPORT;
+      report = fallbackReport;
     }
 
     // Save report to session
