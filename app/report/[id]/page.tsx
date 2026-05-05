@@ -78,6 +78,7 @@ export default function ReportPage() {
   const sessionId = params.id as string;
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     loadEvaluation();
@@ -85,6 +86,9 @@ export default function ReportPage() {
 
   const loadEvaluation = async () => {
     setLoading(true);
+    // Always show demo banner for /report/demo
+    const isDemoSession = sessionId === 'demo';
+    
     try {
       const response = await fetch('/api/evaluate', {
         method: 'POST',
@@ -98,10 +102,12 @@ export default function ReportPage() {
       
       const data = await response.json();
       setEvaluation(data);
+      setIsDemo(isDemoSession);
     } catch (error) {
       console.error('Failed to load evaluation:', error);
       // Fallback to local sample report
       setEvaluation(createMockEvaluation(sessionId));
+      setIsDemo(true);
     } finally {
       setLoading(false);
     }
@@ -131,6 +137,18 @@ export default function ReportPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Demo Banner */}
+      {isDemo && (
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="max-w-7xl mx-auto px-6 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-700 font-semibold text-sm">Demo report — representative evaluator output</span>
+              <span className="text-amber-600 text-xs">(shown because no live evaluation has been generated)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4">

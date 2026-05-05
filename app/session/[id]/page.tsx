@@ -40,6 +40,12 @@ export default function SessionPage() {
   const [showPyramid, setShowPyramid] = useState(false);
   const [pyramidData, setPyramidData] = useState({ headline: '', keyArguments: '', ask: '' });
   const [lastSnapshot, setLastSnapshot] = useState<string>('');
+  const [pmWorkbench, setPmWorkbench] = useState({
+    recommendation: '',
+    keyAssumptions: '',
+    scopeCuts: '',
+    risksTradeoffs: ''
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -209,17 +215,33 @@ export default function SessionPage() {
           pyramidSummary: pyramidData,
         })
       });
-      router.push(`/report/${sessionId}`);
     } catch (error) {
-      console.error('Failed to submit:', error);
-      router.push(`/report/${sessionId}`);
+      console.error('Failed to submit session data:', error);
+      // Continue anyway - report page will use fallback data
     }
+    // Always redirect to report page, even if save fails
+    router.push(`/report/${sessionId}`);
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const insertRecommendationTemplate = () => {
+    const template = `\n## Recommendation\nShip one workflow in 8 weeks: contract Q&A over LegalCo's own corpus.\n\n## Why this scope\n- It supports the board demo.\n- It validates the "deep on your contracts" positioning.\n- It avoids redlining/drafting complexity before retrieval quality is proven.\n`;
+    setMarkdown(prev => prev + template);
+  };
+
+  const insertRiskTemplate = () => {
+    const template = `\n## Risks and tradeoffs\n| Risk | Impact | Mitigation |\n|---|---|---|\n| Poor OCR quality | Retrieval answers may be unreliable | Start with curated design-partner corpus |\n| Scope creep | Demo breaks under real usage | Cut to one workflow |\n| No eval harness | Cannot trust answers | Build basic eval set in week 1 |\n`;
+    setMarkdown(prev => prev + template);
+  };
+
+  const insertPyramidTemplate = () => {
+    const template = `\n## Pyramid summary\nHeadline: Build a focused contract Q&A copilot for the board demo, not a generic legal AI suite.\n\nKey arguments:\n1. One workflow gives LegalCo a credible demo in 8 weeks.\n2. Retrieval quality is the core technical risk.\n3. Design partners need proof on their own contracts, not feature breadth.\n\nAsk:\nApprove a focused MVP scope: contract Q&A first, redlining/drafting later.\n`;
+    setMarkdown(prev => prev + template);
   };
 
   const getLeftContent = () => {
@@ -297,6 +319,66 @@ export default function SessionPage() {
               className="w-full text-lg font-medium bg-transparent border-0 focus:outline-none focus:ring-0 text-zinc-100 placeholder-zinc-600"
             />
           </div>
+          
+          {/* PM Workbench */}
+          <div className="bg-zinc-900 border-b border-zinc-800 p-4">
+            <div className="text-xs font-semibold text-zinc-400 mb-3 uppercase tracking-wider">PM Workbench</div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <textarea
+                  value={pmWorkbench.recommendation}
+                  onChange={(e) => setPmWorkbench({...pmWorkbench, recommendation: e.target.value})}
+                  placeholder="What should LegalCo actually build in 8 weeks?"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent resize-none h-16"
+                />
+              </div>
+              <div>
+                <textarea
+                  value={pmWorkbench.keyAssumptions}
+                  onChange={(e) => setPmWorkbench({...pmWorkbench, keyAssumptions: e.target.value})}
+                  placeholder="What assumptions are you making about users, data, scope, or timeline?"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent resize-none h-16"
+                />
+              </div>
+              <div>
+                <textarea
+                  value={pmWorkbench.scopeCuts}
+                  onChange={(e) => setPmWorkbench({...pmWorkbench, scopeCuts: e.target.value})}
+                  placeholder="What are you explicitly NOT building in v1?"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent resize-none h-16"
+                />
+              </div>
+              <div>
+                <textarea
+                  value={pmWorkbench.risksTradeoffs}
+                  onChange={(e) => setPmWorkbench({...pmWorkbench, risksTradeoffs: e.target.value})}
+                  placeholder="What could break the plan, and how would you mitigate it?"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent resize-none h-16"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={insertRecommendationTemplate}
+                className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+              >
+                Insert recommendation template
+              </button>
+              <button
+                onClick={insertRiskTemplate}
+                className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+              >
+                Insert risk/tradeoff template
+              </button>
+              <button
+                onClick={insertPyramidTemplate}
+                className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+              >
+                Insert pyramid summary draft
+              </button>
+            </div>
+          </div>
+
           <div className="flex-1 flex flex-col">
             <div className="flex border-b border-zinc-800 bg-zinc-900">
               <button

@@ -9,12 +9,6 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-const MOCK_RESPONSES: Record<string, string> = {
-  sarah: "I understand the timeline pressure, but we need to be realistic about what we can deliver. Have you considered which features would have the biggest impact on our engagement metrics? I'm particularly interested in the spending insights feature - do you think we can deliver that within the constraints?",
-  marcus: "From a technical perspective, I'm concerned about the legacy API compatibility requirement. The current architecture wasn't built for the features you're proposing. We might need to consider a phased migration approach. What's your take on the technical trade-offs here?",
-  priya: "I'm excited about the design possibilities, but I'm worried about delivering a cohesive experience with limited design resources. Have you thought about how we can maintain design consistency while moving quickly? Perhaps we could leverage an existing design system to accelerate our work?"
-};
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -43,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     let response: string;
 
-    // Try to get AI response, fall back to mock on failure
+    // Try to get AI response, fall back to demo message on failure or no API key
     if (process.env.ANTHROPIC_API_KEY) {
       try {
         const systemPrompt = AGENT_PROMPTS[agent];
@@ -64,22 +58,22 @@ export async function POST(request: NextRequest) {
           messages: chatHistory,
         });
 
-        response = msg.content[0].type === 'text' ? msg.content[0].text : MOCK_RESPONSES[agent];
+        response = msg.content[0].type === 'text' ? msg.content[0].text : "Set up your secrets in the full version of this app. This is a demo.";
 
         addEvent(sessionId, {
           type: 'agent_message_received',
           payload: { agent, responseLength: response.length },
         });
       } catch (aiError) {
-        console.error('Anthropic error, using fallback:', aiError);
+        console.error('Anthropic error, using demo message:', aiError);
         addEvent(sessionId, {
           type: 'agent_error',
           payload: { agent, error: String(aiError) },
         });
-        response = MOCK_RESPONSES[agent];
+        response = "Set up your secrets in the full version of this app. This is a demo.";
       }
     } else {
-      response = MOCK_RESPONSES[agent];
+      response = "Set up your secrets in the full version of this app. This is a demo.";
     }
 
     // Add assistant response to conversation
@@ -95,7 +89,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: {
         role: 'assistant',
-        content: "I apologize, but I'm having trouble responding right now. Let's continue our conversation.",
+        content: "Set up your secrets in the full version of this app. This is a demo.",
       },
     });
   }
