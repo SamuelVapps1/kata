@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import LatestReportStatus from '@/components/LatestReportStatus';
 
 export default function HRDashboard() {
   const hasApiKey = process.env.ANTHROPIC_API_KEY ? true : false;
@@ -34,12 +35,7 @@ export default function HRDashboard() {
             </p>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-white mb-2">Demo mode fallback</h2>
-            <div className="text-slate-400 text-sm">
-              If no live evaluation has been generated, the report page shows representative demo data.
-            </div>
-          </div>
+          <LatestReportStatus />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">

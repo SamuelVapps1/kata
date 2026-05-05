@@ -26,20 +26,26 @@ export interface Session {
   };
 }
 
+export interface DimensionScore {
+  score: number;
+  evidence: string;
+  rationale: string;
+}
+
 export interface EvaluationResult {
   sessionId: string;
   overallScore: number;
   dimensionScores: {
-    problemDefinition: number;
-    stakeholderManagement: number;
-    analyticalThinking: number;
-    communication: number;
-    prioritization: number;
-    technicalUnderstanding: number;
-    designSensitivity: number;
-    dataDriven: number;
-    executionFocus: number;
-    leadership: number;
+    zero_to_launch: DimensionScore;
+    solution_architecture_fluency: DimensionScore;
+    structured_discovery: DimensionScore;
+    client_engagement_ownership: DimensionScore;
+    commercial_discipline: DimensionScore;
+    ai_native_operating_model: DimensionScore;
+    t_shaped_range: DimensionScore;
+    project_order_knowledge_discipline: DimensionScore;
+    pyramid_communication: DimensionScore;
+    high_agency: DimensionScore;
   };
   summary: string;
   highlights: string[];
@@ -49,6 +55,12 @@ export interface EvaluationResult {
     headline: string;
     keyArguments: string;
     ask: string;
+  };
+  workbench?: {
+    recommendation: string;
+    keyAssumptions: string;
+    scopeCuts: string;
+    risksTradeoffs: string;
   };
 }
 

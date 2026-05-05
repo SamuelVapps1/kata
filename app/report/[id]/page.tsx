@@ -7,30 +7,18 @@ import { EvaluationResult } from '@/lib/types';
 import { createMockEvaluation } from '@/lib/mock-data';
 
 const DIMENSION_LABELS: Record<keyof EvaluationResult['dimensionScores'], string> = {
-  problemDefinition: 'Problem Definition',
-  stakeholderManagement: 'Stakeholder Management',
-  analyticalThinking: 'Analytical Thinking',
-  communication: 'Communication',
-  prioritization: 'Prioritization',
-  technicalUnderstanding: 'Technical Understanding',
-  designSensitivity: 'Design Sensitivity',
-  dataDriven: 'Data Driven',
-  executionFocus: 'Execution Focus',
-  leadership: 'Leadership',
+  zero_to_launch: 'Zero to Launch',
+  solution_architecture_fluency: 'Solution Architecture Fluency',
+  structured_discovery: 'Structured Discovery',
+  client_engagement_ownership: 'Client Engagement Ownership',
+  commercial_discipline: 'Commercial Discipline',
+  ai_native_operating_model: 'AI-Native Operating Model',
+  t_shaped_range: 'T-Shaped Range',
+  project_order_knowledge_discipline: 'Project Order Knowledge Discipline',
+  pyramid_communication: 'Pyramid Communication',
+  high_agency: 'High Agency',
 };
 
-const DIMENSION_EVIDENCE: Record<keyof EvaluationResult['dimensionScores'], string> = {
-  problemDefinition: 'Candidate demonstrated ability to identify core business problems and frame them appropriately for stakeholders.',
-  stakeholderManagement: 'Effectively navigated conflicting priorities between business, technical, and design stakeholders.',
-  analyticalThinking: 'Showed structured approach to breaking down complex problems into manageable components.',
-  communication: 'Articulated ideas clearly and adapted messaging for different stakeholder audiences.',
-  prioritization: 'Made trade-off decisions based on business impact and technical feasibility.',
-  technicalUnderstanding: 'Demonstrated awareness of technical constraints and architectural implications.',
-  designSensitivity: 'Considered user experience implications and design consistency in decisions.',
-  dataDriven: 'Used quantitative and qualitative data to support recommendations.',
-  executionFocus: 'Maintained practical focus on deliverability and implementation considerations.',
-  leadership: 'Showed initiative in driving alignment and facilitating decision-making.',
-};
 
 function getRecommendation(score: number): { text: string; color: string } {
   if (score >= 80) return { text: 'STRONG RECOMMEND TO HIRE', color: 'text-green-700 bg-green-50 border-green-600' };
@@ -40,7 +28,7 @@ function getRecommendation(score: number): { text: string; color: string } {
 }
 
 function ScoreTable({ evaluation }: { evaluation: EvaluationResult }) {
-  const dimensions = Object.entries(evaluation.dimensionScores) as [keyof EvaluationResult['dimensionScores'], number][];
+  const dimensions = Object.entries(evaluation.dimensionScores) as [keyof EvaluationResult['dimensionScores'], any][];
   
   return (
     <table className="w-full text-sm">
@@ -52,20 +40,23 @@ function ScoreTable({ evaluation }: { evaluation: EvaluationResult }) {
         </tr>
       </thead>
       <tbody>
-        {dimensions.map(([key, score]) => (
+        {dimensions.map(([key, dimScore]) => (
           <tr key={key} className="border-b border-gray-100 hover:bg-gray-50">
             <td className="py-2 px-3 font-medium text-gray-900">{DIMENSION_LABELS[key]}</td>
             <td className="py-2 px-3 text-center">
               <span className={`inline-block px-2 py-1 rounded font-bold ${
-                score >= 80 ? 'bg-green-100 text-green-800' :
-                score >= 65 ? 'bg-blue-100 text-blue-800' :
-                score >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                dimScore.score >= 4 ? 'bg-green-100 text-green-800' :
+                dimScore.score >= 3 ? 'bg-blue-100 text-blue-800' :
+                dimScore.score >= 2 ? 'bg-yellow-100 text-yellow-800' :
                 'bg-red-100 text-red-800'
               }`}>
-                {score}
+                {dimScore.score}/5
               </span>
             </td>
-            <td className="py-2 px-3 text-gray-600 text-xs">{DIMENSION_EVIDENCE[key]}</td>
+            <td className="py-2 px-3 text-gray-600 text-xs">
+              <div className="mb-1"><strong>Evidence:</strong> {dimScore.evidence}</div>
+              <div><strong>Rationale:</strong> {dimScore.rationale}</div>
+            </td>
           </tr>
         ))}
       </tbody>
@@ -78,7 +69,7 @@ export default function ReportPage() {
   const sessionId = params.id as string;
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [source, setSource] = useState<'live' | 'session' | 'demo'>('demo');
 
   useEffect(() => {
     loadEvaluation();
@@ -86,28 +77,55 @@ export default function ReportPage() {
 
   const loadEvaluation = async () => {
     setLoading(true);
-    // Always show demo banner for /report/demo
-    const isDemoSession = sessionId === 'demo';
     
     try {
-      const response = await fetch('/api/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch evaluation');
+      // First, try to load from localStorage (live candidate evaluation)
+      const storedReport = localStorage.getItem(`pmkata-report-${sessionId}`);
+      if (storedReport) {
+        const data = JSON.parse(storedReport);
+        setEvaluation(data);
+        setSource('live');
+        setLoading(false);
+        return;
       }
-      
-      const data = await response.json();
-      setEvaluation(data);
-      setIsDemo(isDemoSession);
+
+      // Second, try to load session and generate evaluation client-side
+      const storedSession = localStorage.getItem(`pmkata-session-${sessionId}`);
+      if (storedSession) {
+        const session = JSON.parse(storedSession);
+        const { evaluateCandidate } = await import('@/lib/evaluateCandidate');
+        const data = evaluateCandidate(session);
+        setEvaluation(data);
+        setSource('session');
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to API or mock data
+      try {
+        const response = await fetch('/api/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setEvaluation(data);
+          setSource('session');
+        } else {
+          throw new Error('Failed to fetch evaluation');
+        }
+      } catch (apiError) {
+        console.error('Failed to load evaluation from API:', apiError);
+        // Fallback to mock data
+        setEvaluation(createMockEvaluation(sessionId));
+        setSource('demo');
+      }
     } catch (error) {
       console.error('Failed to load evaluation:', error);
-      // Fallback to local sample report
       setEvaluation(createMockEvaluation(sessionId));
-      setIsDemo(true);
+      setSource('demo');
     } finally {
       setLoading(false);
     }
@@ -133,21 +151,36 @@ export default function ReportPage() {
   }
 
   const recommendation = getRecommendation(evaluation.overallScore);
-  const dimensions = Object.entries(evaluation.dimensionScores) as [keyof EvaluationResult['dimensionScores'], number][];
+  const dimensions = Object.entries(evaluation.dimensionScores) as [keyof EvaluationResult['dimensionScores'], any][];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Demo Banner */}
-      {isDemo && (
-        <div className="bg-amber-50 border-b border-amber-200">
-          <div className="max-w-7xl mx-auto px-6 py-3">
-            <div className="flex items-center gap-2">
-              <span className="text-amber-700 font-semibold text-sm">Demo report — representative evaluator output</span>
-              <span className="text-amber-600 text-xs">(shown because no live evaluation has been generated)</span>
-            </div>
+      {/* Source Banner */}
+      <div className={`border-b ${
+        source === 'live' ? 'bg-green-50 border-green-200' :
+        source === 'session' ? 'bg-blue-50 border-blue-200' :
+        'bg-amber-50 border-amber-200'
+      }`}>
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex items-center gap-2">
+            <span className={`font-semibold text-sm ${
+              source === 'live' ? 'text-green-700' :
+              source === 'session' ? 'text-blue-700' :
+              'text-amber-700'
+            }`}>
+              {source === 'live' ? 'Live candidate evaluation' :
+               source === 'session' ? 'Generated from saved candidate session' :
+               'Demo report — representative evaluator output'}
+            </span>
+            {source !== 'live' && (
+              <span className="text-xs opacity-75">
+                {source === 'session' ? '(Source: browser demo session. Production version would persist this server-side.)' :
+                 '(shown because no live evaluation has been generated)'}
+              </span>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Header */}
       <div className="bg-white border-b border-slate-200">
@@ -203,33 +236,34 @@ export default function ReportPage() {
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Detailed Assessment</h2>
           </div>
           <div className="divide-y divide-slate-100">
-            {dimensions.map(([key, score]) => (
+            {dimensions.map(([key, dimScore]) => (
               <div key={key} className="p-4 hover:bg-slate-50">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-sm font-semibold text-slate-900">{DIMENSION_LABELS[key]}</h3>
                       <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
-                        score >= 80 ? 'bg-green-100 text-green-800' :
-                        score >= 65 ? 'bg-blue-100 text-blue-800' :
-                        score >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                        dimScore.score >= 4 ? 'bg-green-100 text-green-800' :
+                        dimScore.score >= 3 ? 'bg-blue-100 text-blue-800' :
+                        dimScore.score >= 2 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {score}/100
+                        {dimScore.score}/5
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">{DIMENSION_EVIDENCE[key]}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed mb-2"><strong>Evidence:</strong> {dimScore.evidence}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed"><strong>Rationale:</strong> {dimScore.rationale}</p>
                   </div>
                   <div className="w-24 flex-shrink-0">
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full ${
-                          score >= 80 ? 'bg-green-600' :
-                          score >= 65 ? 'bg-blue-600' :
-                          score >= 50 ? 'bg-yellow-600' :
+                          dimScore.score >= 4 ? 'bg-green-600' :
+                          dimScore.score >= 3 ? 'bg-blue-600' :
+                          dimScore.score >= 2 ? 'bg-yellow-600' :
                           'bg-red-600'
                         }`}
-                        style={{ width: `${score}%` }}
+                        style={{ width: `${(dimScore.score / 5) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -305,6 +339,33 @@ export default function ReportPage() {
             </div>
           </div>
         </div>
+
+        {/* PM Workbench Values */}
+        {evaluation.workbench && (
+          <div className="bg-white border border-slate-200 rounded-sm mb-6">
+            <div className="px-6 py-4 border-b border-slate-200">
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">PM Workbench</h2>
+            </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Recommendation</div>
+                <div className="bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-wrap">{evaluation.workbench.recommendation || 'Not provided'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Key Assumptions</div>
+                <div className="bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-wrap">{evaluation.workbench.keyAssumptions || 'Not provided'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Scope Cuts</div>
+                <div className="bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-wrap">{evaluation.workbench.scopeCuts || 'Not provided'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Risks / Tradeoffs</div>
+                <div className="bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-wrap">{evaluation.workbench.risksTradeoffs || 'Not provided'}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Final Deliverable */}
         <div className="bg-white border border-slate-200 rounded-sm">

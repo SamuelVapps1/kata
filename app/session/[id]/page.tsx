@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { mockBrief, mockDiscoveryTranscript, mockInternalEmail } from '@/lib/mock-data';
 import { Message as ApiMessage, Session } from '@/lib/schema';
+import { evaluateCandidate } from '@/lib/evaluateCandidate';
 
 type LeftTab = 'brief' | 'discovery' | 'email';
 type AgentPersona = 'sarah' | 'marcus' | 'priya';
@@ -68,6 +69,7 @@ export default function SessionPage() {
     const saveTimer = setTimeout(() => {
       if (title || markdown) {
         saveSession();
+        saveToLocalSession();
         // Log editor snapshot
         console.log('[Editor Snapshot]', {
           timestamp: Date.now(),
@@ -79,7 +81,7 @@ export default function SessionPage() {
       }
     }, 2000);
     return () => clearTimeout(saveTimer);
-  }, [title, markdown]);
+  }, [title, markdown, pmWorkbench, pyramidData]);
 
   const loadSession = async () => {
     try {
@@ -129,6 +131,26 @@ export default function SessionPage() {
       console.error('Failed to save session:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveToLocalSession = () => {
+    try {
+      const snapshot = {
+        id: sessionId,
+        updatedAt: new Date().toISOString(),
+        title,
+        deliverableMarkdown: markdown,
+        workbench: pmWorkbench,
+        pyramid: {
+          headline: pyramidData.headline,
+          keyArguments: pyramidData.keyArguments,
+          ask: pyramidData.ask,
+        },
+      };
+      localStorage.setItem(`pmkata-session-${sessionId}`, JSON.stringify(snapshot));
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
     }
   };
 
@@ -219,6 +241,30 @@ export default function SessionPage() {
       console.error('Failed to submit session data:', error);
       // Continue anyway - report page will use fallback data
     }
+
+    // Save final session snapshot to localStorage
+    saveToLocalSession();
+
+    // Generate evaluation using deterministic evaluator
+    try {
+      const snapshot = {
+        id: sessionId,
+        updatedAt: new Date().toISOString(),
+        title,
+        deliverableMarkdown: markdown,
+        workbench: pmWorkbench,
+        pyramid: {
+          headline: pyramidData.headline,
+          keyArguments: pyramidData.keyArguments,
+          ask: pyramidData.ask,
+        },
+      };
+      const evaluation = evaluateCandidate(snapshot);
+      localStorage.setItem(`pmkata-report-${sessionId}`, JSON.stringify(evaluation));
+    } catch (error) {
+      console.error('Failed to generate evaluation:', error);
+    }
+
     // Always redirect to report page, even if save fails
     router.push(`/report/${sessionId}`);
   };

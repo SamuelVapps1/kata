@@ -100,16 +100,16 @@ export function createMockEvaluation(sessionId: string): EvaluationResult {
     sessionId,
     overallScore: 72,
     dimensionScores: {
-      problemDefinition: 75,
-      stakeholderManagement: 80,
-      analyticalThinking: 70,
-      communication: 75,
-      prioritization: 65,
-      technicalUnderstanding: 70,
-      designSensitivity: 75,
-      dataDriven: 68,
-      executionFocus: 72,
-      leadership: 74
+      zero_to_launch: { score: 3, evidence: 'Candidate proposed phased MVP approach with clear scope boundaries', rationale: 'Shows reasonable zero-to-launch thinking with phased delivery model' },
+      solution_architecture_fluency: { score: 3, evidence: 'Mentioned retrieval, API integration, and data pipeline considerations', rationale: 'Demonstrates basic technical architecture awareness' },
+      structured_discovery: { score: 3, evidence: 'Identified key assumptions about user behavior and technical constraints', rationale: 'Shows structured approach to problem discovery' },
+      client_engagement_ownership: { score: 4, evidence: 'Engaged with Sarah, Marcus, and Priya on their specific concerns', rationale: 'Strong stakeholder management and client engagement' },
+      commercial_discipline: { score: 2, evidence: 'Limited discussion of budget, ROI, or business metrics', rationale: 'Could strengthen commercial discipline and business value articulation' },
+      ai_native_operating_model: { score: 3, evidence: 'Used agent collaboration to gather stakeholder input', rationale: 'Shows awareness of AI collaboration patterns' },
+      t_shaped_range: { score: 3, evidence: 'Covered engineering, design, and business considerations', rationale: 'Demonstrates cross-disciplinary thinking' },
+      project_order_knowledge_discipline: { score: 3, evidence: 'Structured deliverable with clear sections and workbench filled', rationale: 'Shows reasonable organizational discipline' },
+      pyramid_communication: { score: 4, evidence: 'Clear headline with supporting arguments and explicit ask', rationale: 'Strong pyramid communication structure' },
+      high_agency: { score: 3, evidence: 'Made specific recommendations with scope tradeoffs', rationale: 'Shows decisive action orientation' },
     },
     summary: "The candidate demonstrates strong stakeholder management skills and shows good understanding of the business context. They effectively balanced competing priorities from Sarah, Marcus, and Priya. Areas for improvement include more rigorous data-driven decision making and clearer prioritization framework.",
     highlights: [
@@ -127,6 +127,12 @@ export function createMockEvaluation(sessionId: string): EvaluationResult {
       headline: "Phased mobile refresh delivers 80% of value in 4 months while building foundation for long-term success",
       keyArguments: "1. Phase 1 (4 months): UI refresh + biometric login addresses 60% of user complaints\n2. Phase 2 (2 months): Spending insights and bill split complete the feature set\n3. Technical debt addressed incrementally to minimize risk\n4. Design system adoption accelerates delivery without sacrificing quality",
       ask: "Approval to proceed with phased approach, including reallocating 1 developer from internal dashboard project and hiring contract designer for 2 months"
+    },
+    workbench: {
+      recommendation: "Ship a focused MVP in 8 weeks: contract Q&A over LegalCo's own corpus for the board demo.",
+      keyAssumptions: "Design partners have clean contract corpus available; retrieval quality is the main technical risk; board demo timeline is non-negotiable.",
+      scopeCuts: "Not building in v1: redlining, drafting, multi-workflow support, advanced eval harness.",
+      risksTradeoffs: "Poor OCR quality could break retrieval; mitigating by starting with curated corpus. Scope creep risk; mitigating by cutting to single workflow."
     }
   };
 }
