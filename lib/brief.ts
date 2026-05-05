@@ -1,37 +1,37 @@
-export const BRIEF = `# Client Brief: FinTech Mobile App Refresh
+export const BRIEF = `# Client Brief: LegalCo Case Management AI Copilot
 
-**Client:** NovaBank
-**Project:** Mobile Banking App Redesign
-**Timeline:** 6 months
-**Budget:** $500,000
+**Client:** LegalCo
+**Project:** Case Management Workflow Upgrade
+**Timeline:** 12 weeks
+**Budget:** $350,000
 
 ## Background
-NovaBank's current mobile app was built 4 years ago. User engagement has dropped 35% in the last year. Customer complaints focus on:
-- Slow navigation
-- Outdated UI
-- Missing key features compared to competitors
-- Poor accessibility
+LegalCo's case operations rely on fragmented tools across email, spreadsheets, and legacy matter tracking. Intake-to-resolution cycle time has increased 28% over the last 2 quarters. Team pain points:
+- Duplicate data entry across systems
+- Slow document retrieval during active matters
+- Inconsistent matter status visibility
+- Manual handoffs causing missed SLAs
 
 ## Objectives
-1. Improve user engagement by 40%
-2. Reduce support tickets by 25%
-3. Launch 3 new features: biometric login, spending insights, bill split
-4. Improve App Store rating from 2.8 to 4.5+
+1. Reduce matter cycle time by 30%
+2. Improve first-response SLA adherence from 72% to 92%
+3. Launch AI-assisted intake summarization, risk flagging, and timeline views
+4. Increase internal CSAT from 3.1 to 4.3+
 
 ## Constraints
-- Must maintain legacy backend API compatibility
-- Compliance team requires 4-week security review
-- Limited design resources (1 designer available 50% time)
-- Engineering team is 3 developers, already at capacity
+- Must integrate with existing document repository and billing export format
+- Compliance team requires auditability of AI-generated suggestions
+- Limited design capacity (1 designer at 50% allocation)
+- Engineering team has 3 developers with ongoing BAU load
 
 ## Key Stakeholders
-- Sarah Chen (Product Owner): Budget holder, focused on business metrics
-- Marcus Rodriguez (Tech Lead): Concerned about technical debt and timeline
-- Priya Sharma (Designer): Advocating for complete redesign, worried about scope
+- Sarah Chen (Client Proxy): Focused on outcomes, cost, and timeline confidence
+- Marcus Rodriguez (Engineering Lead): Focused on delivery risk and system constraints
+- Priya Sharma (Design Lead): Focused on workflow clarity and adoption
 
 ## Success Metrics
-- DAU/MAU ratio increase
-- Task completion rate
-- Time to complete key tasks
-- NPS score
-- App Store rating`;
+- Intake-to-resolution cycle time
+- SLA compliance %
+- Rework rate on intake packets
+- User satisfaction from legal ops teams
+- Escalation volume per matter`;

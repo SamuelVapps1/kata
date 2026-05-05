@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend } from 'recharts';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 import ReactMarkdown from 'react-markdown';
 import { EvaluationResult } from '@/lib/types';
 import { createMockEvaluation } from '@/lib/mock-data';
@@ -183,13 +183,13 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* Dimension Scores - Chart or Table Fallback */}
+        {/* Dimension Scores */}
         <div className="bg-white border border-slate-200 rounded-sm mb-6">
           <div className="px-6 py-4 border-b border-slate-200">
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Dimension Scores</h2>
           </div>
           <div className="p-6">
-            <div className="h-80">
+            <div className="hidden lg:block h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#e2e8f0" />
@@ -205,6 +205,9 @@ export default function ReportPage() {
                   />
                 </RadarChart>
               </ResponsiveContainer>
+            </div>
+            <div className="lg:hidden">
+              <ScoreTable evaluation={evaluation} />
             </div>
           </div>
         </div>

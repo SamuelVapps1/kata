@@ -1,74 +1,74 @@
 import { Session, EvaluationResult, AgentPersona } from './types';
 
-export const mockBrief = `# Client Brief: FinTech Mobile App Refresh
+export const mockBrief = `# Client Brief: LegalCo Case Management AI Copilot
 
-**Client:** NovaBank
-**Project:** Mobile Banking App Redesign
-**Timeline:** 6 months
-**Budget:** $500,000
+**Client:** LegalCo
+**Project:** Case Management Workflow Upgrade
+**Timeline:** 12 weeks
+**Budget:** $350,000
 
 ## Background
-NovaBank's current mobile app was built 4 years ago. User engagement has dropped 35% in the last year. Customer complaints focus on:
-- Slow navigation
-- Outdated UI
-- Missing key features compared to competitors
-- Poor accessibility
+LegalCo's case operations rely on fragmented tools across email, spreadsheets, and legacy matter tracking. Intake-to-resolution cycle time has increased 28% over the last 2 quarters. Team pain points:
+- Duplicate data entry across systems
+- Slow document retrieval during active matters
+- Inconsistent matter status visibility
+- Manual handoffs causing missed SLAs
 
 ## Objectives
-1. Improve user engagement by 40%
-2. Reduce support tickets by 25%
-3. Launch 3 new features: biometric login, spending insights, bill split
-4. Improve App Store rating from 2.8 to 4.5+
+1. Reduce matter cycle time by 30%
+2. Improve first-response SLA adherence from 72% to 92%
+3. Launch AI-assisted intake summarization, risk flagging, and timeline views
+4. Increase internal CSAT from 3.1 to 4.3+
 
 ## Constraints
-- Must maintain legacy backend API compatibility
-- Compliance team requires 4-week security review
-- Limited design resources (1 designer available 50% time)
-- Engineering team is 3 developers, already at capacity
+- Must integrate with existing document repository and billing export format
+- Compliance team requires auditability of AI-generated suggestions
+- Limited design capacity (1 designer at 50% allocation)
+- Engineering team has 3 developers with ongoing BAU load
 
 ## Key Stakeholders
-- Sarah Chen (Product Owner): Budget holder, focused on business metrics
-- Marcus Rodriguez (Tech Lead): Concerned about technical debt and timeline
-- Priya Sharma (Designer): Advocating for complete redesign, worried about scope
+- Sarah Chen (Client Proxy): Focused on outcomes, cost, and timeline confidence
+- Marcus Rodriguez (Engineering Lead): Focused on delivery risk and system constraints
+- Priya Sharma (Design Lead): Focused on workflow clarity and adoption
 
 ## Success Metrics
-- DAU/MAU ratio increase
-- Task completion rate
-- Time to complete key tasks
-- NPS score
-- App Store rating`;
+- Intake-to-resolution cycle time
+- SLA compliance %
+- Rework rate on intake packets
+- User satisfaction from legal ops teams
+- Escalation volume per matter`;
 
-export const mockDiscoveryTranscript = `**Initial Discovery Call - March 15, 2025**
+export const mockDiscoveryTranscript = `**Initial Discovery Call - March 15, 2026**
 
-Sarah Chen: "We need to move fast. Competitors are eating our lunch. I want this done in 4 months, not 6."
+Sarah Chen: "We need this in-market this quarter. Leadership wants measurable cycle-time improvement in 12 weeks."
 
-Marcus Rodriguez: "4 months is impossible with our current team. We'd need to cut scope significantly. Also, the legacy API doesn't support biometric auth - we'd need to rebuild that layer."
+Marcus Rodriguez: "Twelve weeks is aggressive with current staffing. We can ship, but only if we phase scope. Also, audit logging for AI actions is non-negotiable."
 
-Priya Sharma: "If we cut scope, we can't deliver the experience users expect. I recommend a phased approach - core refresh now, features later. But I need more design time."
+Priya Sharma: "If we overpack phase one, adoption will suffer. We should prioritize intake clarity and status visibility first."
 
-Sarah: "Phased approach means we don't hit the engagement targets this quarter. That's a problem for my stakeholders."
+Sarah: "I can defend phased delivery if the first release clearly improves SLA compliance."
 
-Marcus: "I can maybe free up one dev if we pause the internal dashboard project, but that has its own risks."
+Marcus: "I can free one developer if we defer the internal dashboard cleanup, but that increases maintenance risk."
 
-Priya: "What if we use a design system to speed things up? I've been researching options."`;
+Priya: "We should reuse the existing design system and limit new components to critical workflow gaps."`;
 
-export const mockInternalEmail = `From: Marcus Rodriguez <marcus@novabank.com>
+export const mockInternalEmail = `From: Marcus Rodriguez <marcus@legalco.com>
 To: Sarah Chen, Priya Sharma
-Subject: Technical constraints for mobile refresh
+Subject: Technical constraints for LegalCo workflow upgrade
 
 Hi team,
 
 After reviewing the current codebase, I need to flag some technical risks:
 
-1. The legacy API layer doesn't support OAuth 2.0, which biometric login requires. This is a 3-week effort minimum.
+1. Current matter service has no event log model for AI recommendations. Audit trail implementation is a 2-3 week effort.
 
-2. Our current analytics implementation would need a complete overhaul to support the spending insights feature.
+2. Document retrieval API has unstable response times under load; AI-assisted summarization depends on this path.
 
-3. We're using an outdated version of React Native. Upgrading alone would take 2 weeks and carries integration risks.
+3. Billing export format is tightly coupled to legacy status codes; any workflow changes must preserve mapping rules.
 
 Given these constraints, I recommend we either:
-- Extend timeline to 8 months, or
-- Reduce scope to just UI refresh + one feature
+- Keep phase one to intake summary + timeline visibility + SLA alerts, or
+- Extend timeline by 4 weeks to include risk flagging in first release
 
 Let me know your thoughts.
 
